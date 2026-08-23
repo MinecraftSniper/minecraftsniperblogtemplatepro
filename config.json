@@ -1,0 +1,13 @@
+{
+  "siteTitle": "Minecraft",
+  "background": "/image/Minecraft.png",
+  "favicon": "/image/logo.png",
+  "port":80,
+  "refreshInterval": 3000,
+  "sources": {
+    "home": "home.md",
+    "about": "about.md",
+    "posts": "posts",
+    "moments": "moments"
+  }
+}
