@@ -57,3 +57,7 @@ MinecraftSniper 博客模板 Pro 是一个**轻量、安全、可管理**的个�
 ## 📁 目录结构
 
 详细的目录结构请查看：[目录结构概览.txt](./目录结构概览.txt)
+
+## 版权信息
+
+© 林鋆成 All Rights Reserved.
