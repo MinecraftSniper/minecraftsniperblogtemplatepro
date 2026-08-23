@@ -1,0 +1,14 @@
+{
+  "background": "/image/Minecraft.png",
+  "title": "我的博客管理后台",
+  "adminPort": 443,
+  "https": {
+    "enabled": "auto",
+    "keyPath": "sslkey/MinecraftSniper.key",
+    "certPath": "sslkey/MinecraftSniper.crt"
+  },
+  "session": {
+    "timeout": 604800
+  },
+  "version": "1.0"
+}
