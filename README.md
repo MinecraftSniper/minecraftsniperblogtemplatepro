@@ -1,39 +1,59 @@
-# MinecraftSniper博客模板pro
+# MinecraftSniper 博客模板 Pro
 
-#### 介绍
-{**以下是 Gitee 平台说明，您可以替换此简介**
-Gitee 是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用 Gitee 实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
+> MinecraftSniper 博客模板的增强版，在原有轻量博客基础上，增加了完整的管理后台、私钥认证、HTTPS 支持、内存缓存管理、文章/动态文件管理等功能。
 
-#### 软件架构
-软件架构说明
+**基础版链接：** [MinecraftSniper 博客模板](https://gitee.com/Minecraft-Sniper/minecraftsniperblogtemplate)
 
+## 📖 项目简介
 
-#### 安装教程
+MinecraftSniper 博客模板 Pro 是一个**轻量、安全、可管理**的个人博客系统。基于 Node.js + Express 构建，以 Markdown 文件作为内容源，无数据库依赖，开箱即用。
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+**Pro 版本在基础版上新增了：**
+- 🔐 **私钥认证登录**（RSA 2048 位，替代传统密码）
+- 🛠️ **独立管理后台**（独立端口，与前台隔离）
+- 📝 **文章/动态在线管理**（上传、下载、删除）
+- 🧠 **内存缓存可视化配置**（实时调整缓存策略）
+- 🔒 **HTTPS 自动检测支持**（证书存在即启用）
+- 📊 **性能监控面板**（内存、缓存、日志实时查看）
 
-#### 使用说明
+## ✨ 功能特性
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+### 前台博客
+- **Markdown 写文章**：在 `content/posts/` 中新建 `.md` 文件即可发布
+- **动态发布**：在 `content/moments/` 中新建 `.md` 文件发布短动态
+- **热更新**：修改 Markdown 文件后，前端自动刷新（无需重启服务）
+- **四页面导航**：主页、文章列表、动态列表、关于我
+- **响应式设计**：适配桌面端和移动端
+- **视觉风格**：参考 HarmonyOS NEXT，支持液态玻璃质感和沉浸光效
 
-#### 参与贡献
+### 后台管理（Pro 版新增）
+- **🔐 私钥认证**：RSA 2048 位密钥对登录，无需记忆密码
+- **📊 性能监控**：Node 进程内存、系统内存、缓存状态、内容统计、运行时间、实时日志
+- **📝 文章管理**：上传 `.md` 文件、下载文章、删除文章
+- **✨ 动态管理**：上传 `.md` 文件、下载动态、删除动态
+- **🧠 内存缓存管理**：可视化切换 `auto/true/false` 模式，调整缓存上限
+- **⚙️ 系统信息**：Node 版本、运行时长、依赖版本、版权信息
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+### 技术特性
+- **极低资源占用**：256MB 内存即可运行
+- **无数据库**：所有内容以 Markdown 文件存储，复制即备份
+- **内存缓存管理**：支持 `auto`（自动）/ `true`（手动）/ `false`（禁用）三种模式
+- **定时内存检查**：每 30 秒自动检测内存，紧张时自动降级
+- **HTTPS 自动适配**：证书存在时自动启用 HTTPS，不存在时降级为 HTTP
+- **中文文件名支持**：上传中文名的 `.md` 文件无乱码
 
+## 🛠️ 技术栈
 
-#### 特技
+| 组件 | 技术 |
+| :--- | :--- |
+| 服务端 | Node.js + Express |
+| 前端 | 原生 HTML/CSS/JavaScript |
+| 内容源 | Markdown 文件 |
+| 文件上传 | Multer |
+| 热更新 | chokidar |
+| 认证 | RSA 2048 + JWT |
+| 日志 | 控制台 + 按天轮转文件 |
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+## 📁 目录结构
+
+详细的目录结构请查看：[目录结构概览.txt](./目录结构概览.txt)
