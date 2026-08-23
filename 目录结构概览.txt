@@ -1,0 +1,39 @@
+目录结构概览
+/
+├── server.js                    # 博客主页服务端核心
+├── adminserver.js               # 管理后台服务（独立端口）
+├── memorycache.js               # 内存缓存管理模块
+├── package.json                 # 项目依赖
+├── pnpm-lock.yaml               # 依赖锁定文件
+│
+├── config.json                  # 前台站点配置文件
+├── adminconfig.json             # 管理后台配置文件
+├── memorycache.json             # 内存缓存配置文件
+│
+├── content/                     # 内容目录
+│   ├── home.md                  # 主页内容
+│   ├── about.md                 # 关于我页面
+│   ├── posts/                   # 文章目录
+│   │   └── *.md                 # 文章文件
+│   └── moments/                 # 动态目录
+│       └── *.md                 # 动态文件
+│
+├── public/                      # 前台静态资源
+│   └── index.html               # 前台博客页面
+│
+├── adminpublic/                 # 管理后台静态资源（Pro 版新增）
+│   ├── login.html               # 管理员登录页
+│   └── admin.html               # 管理后台主页
+│
+├── sslkey/                      # SSL 证书目录
+│   ├── privkey.pem              # SSL 私钥
+│   └── fullchain.pem            # SSL 证书
+│
+├── image/                       # 图片资源
+│   ├── Minecraft.png            # 背景图
+│   └── logo.png                 # 网站图标
+│
+├── logs/                        # 日志目录（自动生成）
+│   └── app-YYYY-MM-DD.log       # 按天轮转的日志文件
+│
+└── admin.pub                    # 管理员公钥（自动生成）
