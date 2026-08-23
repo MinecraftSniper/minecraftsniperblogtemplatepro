@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>加载中...</title>
+    <link rel="icon" href="data:,">
+    <style>
+        /* ===== 全局重置 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+            line-height: 1.8;
+            min-height: 100vh;
+            background-size: cover;
+            background-position: center;
+            /* 手机端 fixed 背景可能导致卡顿，改用 scroll */
+            background-attachment: scroll;
+            transition: background-image 0.6s;
+            position: relative;
+            overflow-x: hidden;
+            color: #1a1a2e;
+        }
+
+        /* ===== 主容器 ===== */
+        .overlay {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+            min-height: 100vh;
+
+            background: rgba(255, 255, 255, var(--glass-alpha, 0));
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-top: none;
+            border-bottom: none;
+
+            box-shadow:
+                inset 0 0 160px rgba(255, 255, 255, 0.20),
+                inset 0 -30px 80px rgba(255, 255, 255, 0.10),
+                0 30px 80px rgba(0, 0, 0, 0.12),
+                0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+
+            overflow: hidden;
+            border-radius: 0;
+            isolation: isolate;
+            transition: background 0.15s ease;
+        }
+
+        /* ===== 导航栏（移动端优化） ===== */
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.20);
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            flex: 1 1 auto;
+        }
+
+        nav a {
+            cursor: pointer;
+            font-size: 1.0rem;
+            color: #1a1a2e;
+            text-decoration: none;
+            padding: 5px 14px;
+            border-radius: 40px;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            background: rgba(255, 255, 255, 0.20);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.30);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            text-shadow: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            white-space: nowrap;
+        }
+
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.45);
+            border-color: rgba(255, 255, 255, 0.90);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08), 0 0 50px rgba(255, 255, 255, 0.40);
+            transform: translateY(-2px) scale(1.02);
+            color: #000;
+        }
+
+        nav a.active {
+            background: rgba(255, 255, 255, 0.50);
+            border-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 0 60px rgba(255, 215, 0, 0.20);
+            color: #0a0a1a;
+            font-weight: 600;
+        }
+
+        /* ===== 💎 滑块工具栏（移动端优化） ===== */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 10px 2px 14px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+            font-size: 0.8rem;
+            color: #1a1a2e;
+            user-select: none;
+            flex-shrink: 0;
+            height: 36px;
+        }
+        .toolbar label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .toolbar .icon {
+            font-size: 1.0rem;
+            line-height: 1;
+            opacity: 0.8;
+        }
+        .toolbar input[type="range"] {
+            width: 80px;
+            height: 3px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.30);
+            border-radius: 4px;
+            outline: none;
+            transition: background 0.2s;
+        }
+        .toolbar input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.70);
+            border: 2px solid rgba(255, 255, 255, 0.90);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+            transition: 0.15s;
+        }
+        .toolbar input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            background: rgba(255, 255, 255, 0.90);
+        }
+        .toolbar input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.70);
+            border: 2px solid rgba(255, 255, 255, 0.90);
+            cursor: pointer;
+        }
+        .toolbar .value {
+            min-width: 32px;
+            text-align: center;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            background: rgba(255, 255, 255, 0.20);
+            padding: 0 4px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+            font-size: 0.7rem;
+            line-height: 20px;
+        }
+        /* 手机上隐藏“透明度”文字标签，节省空间 */
+        .toolbar .label-text {
+            display: inline-block;
+        }
+        @media (max-width: 480px) {
+            .toolbar .label-text {
+                display: none;
+            }
+            .toolbar input[type="range"] {
+                width: 60px;
+            }
+        }
+
+        /* ===== 涟漪画布 & 高光 ===== */
+        #rippleCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .glow-follow {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.18) 0%, transparent 40%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .overlay:hover .glow-follow {
+            opacity: 1;
+        }
+
+        .overlay>*:not(#rippleCanvas):not(.glow-follow) {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ===== 内容区域 ===== */
+        #content {
+            animation: fade 0.4s ease;
+            padding: 0 2px;
+        }
+
+        @keyframes fade {
+            from {
+                opacity: 0.2;
+                transform: translateY(12px);
+                filter: blur(2px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                filter: blur(0);
+            }
+        }
+
+        /* ===== 卡片（移动端优化） ===== */
+        .item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.20);
+            padding: 16px 14px;
+            margin-bottom: 10px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04), inset 0 0 40px rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .item:hover::before {
+            opacity: 1;
+        }
+
+        .item:hover {
+            background: rgba(255, 255, 255, 0.28);
+            backdrop-filter: blur(14px);
+            transform: translateY(-3px) scale(1.005);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 0 0 70px rgba(255, 215, 0, 0.06);
+            border-color: rgba(255, 255, 255, 0.35);
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item h3 {
+            font-size: 1.2rem;
+            margin-bottom: 6px;
+            color: #1a1a2e;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            text-shadow: none;
+        }
+
+        .item h3 small {
+            font-weight: 400;
+            font-size: 0.75rem;
+            color: rgba(0, 0, 0, 0.50);
+            background: rgba(255, 255, 255, 0.30);
+            padding: 2px 10px;
+            border-radius: 30px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.20);
+        }
+
+        /* ===== 全局文字无阴影 ===== */
+        #content p,
+        #content li,
+        #content blockquote,
+        #content div:not(.item),
+        #content h1,
+        #content h2,
+        #content h3,
+        #content a,
+        #content .home-content,
+        #content .about-content {
+            text-shadow: none !important;
+        }
+
+        #content a {
+            color: #1a4a7a;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(26, 74, 122, 0.15);
+            transition: all 0.25s;
+        }
+        #content a:hover {
+            color: #0a2a4a;
+            border-bottom-color: #1a4a7a;
+        }
+
+        #content img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        #content blockquote {
+            border-left: 4px solid rgba(255, 215, 0, 0.40);
+            padding: 10px 16px;
+            margin: 16px 0;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(6px);
+            border-radius: 0 12px 12px 0;
+            box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.03);
+        }
+
+        /* ===== 错误提示 ===== */
+        .error-msg {
+            background: rgba(255, 200, 200, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 0, 0, 0.12);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            color: #3a1a1a;
+            box-shadow: 0 8px 30px rgba(255, 0, 0, 0.03);
+            text-shadow: none;
+        }
+        .error-msg button {
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.50);
+            border-radius: 40px;
+            padding: 6px 20px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            text-shadow: none;
+        }
+        .error-msg button:hover {
+            background: rgba(255, 255, 255, 0.60);
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.04);
+        }
+
+        /* ===== 滚动条 ===== */
+        ::-webkit-scrollbar {
+            width: 4px;
+            background: transparent;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(4px);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 10px;
+            backdrop-filter: blur(4px);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        /* ============================================================
+               移动端专用适配（全面优化）
+               ============================================================ */
+
+        /* 小屏手机 (宽度 ≤ 480px) */
+        @media (max-width: 480px) {
+            .overlay {
+                padding: 14px 10px 30px;
+            }
+            nav {
+                gap: 8px;
+                padding-bottom: 12px;
+                margin-bottom: 18px;
+            }
+            .nav-links {
+                gap: 6px;
+                justify-content: center;
+                width: 100%;
+            }
+            nav a {
+                font-size: 0.9rem;
+                padding: 4px 10px;
+                border-radius: 30px;
+                letter-spacing: 0;
+            }
+            .toolbar {
+                height: 32px;
+                padding: 2px 8px 2px 12px;
+                font-size: 0.7rem;
+                gap: 4px;
+                align-self: center;
+            }
+            .toolbar input[type="range"] {
+                width: 60px;
+                height: 3px;
+            }
+            .toolbar .value {
+                min-width: 28px;
+                font-size: 0.65rem;
+                line-height: 18px;
+                padding: 0 3px;
+            }
+            .toolbar .icon {
+                font-size: 0.9rem;
+            }
+            .item {
+                padding: 12px 10px;
+                border-radius: 12px;
+                margin-bottom: 8px;
+            }
+            .item h3 {
+                font-size: 1.05rem;
+                gap: 6px;
+            }
+            .item h3 small {
+                font-size: 0.65rem;
+                padding: 1px 8px;
+            }
+            #content {
+                padding: 0;
+            }
+            #content h1 {
+                font-size: 1.6rem;
+            }
+            #content h2 {
+                font-size: 1.3rem;
+            }
+            #content h3 {
+                font-size: 1.1rem;
+            }
+            #content p,
+            #content li {
+                font-size: 0.95rem;
+            }
+            .error-msg {
+                padding: 16px;
+            }
+            .error-msg button {
+                font-size: 0.85rem;
+                padding: 4px 16px;
+            }
+        }
+
+        /* 中等屏幕 (手机横屏/小平板) */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .overlay {
+                padding: 20px 16px 40px;
+            }
+            nav a {
+                font-size: 1.05rem;
+                padding: 5px 14px;
+            }
+            .toolbar input[type="range"] {
+                width: 80px;
+            }
+            .item {
+                padding: 16px 14px;
+            }
+        }
+
+        /* 大屏优化：恢复背景附着固定，提升视觉效果 */
+        @media (min-width: 769px) {
+            body {
+                background-attachment: fixed;
+            }
+            .overlay {
+                padding: 30px 20px 60px;
+            }
+            nav a {
+                font-size: 1.2rem;
+                padding: 6px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay">
+        <canvas id="rippleCanvas"></canvas>
+        <div class="glow-follow" id="glowFollow"></div>
+
+        <nav id="navbar">
+            <div class="nav-links">
+                <a data-page="home" class="active">🏠 主页</a>
+                <a data-page="posts">📝 文章</a>
+                <a data-page="moments">✨ 动态</a>
+                <a data-page="about">👤 关于我</a>
+            </div>
+
+            <!-- 💎 透明度滑块 -->
+            <div class="toolbar" id="toolbar">
+                <label>
+                    <span class="icon">💎</span>
+                    <span class="label-text"></span>
+                    <input type="range" id="alphaSlider" min="0" max="100" step="1" value="100">
+                    <span class="value" id="alphaValue">100%</span>
+                </label>
+            </div>
+        </nav>
+
+        <div id="content"></div>
+    </div>
+
+    <script>
+        // ============================================================
+        // 0. 💎 透明度滑块映射：滑块 0-100 → 实际 0-0.5
+        // ============================================================
+        const slider = document.getElementById('alphaSlider');
+        const alphaValue = document.getElementById('alphaValue');
+        const overlay = document.getElementById('overlay');
+
+        function updateAlpha(sliderVal) {
+            const percent = parseFloat(sliderVal);
+            const alpha = percent / 100 * 0.5;
+            overlay.style.setProperty('--glass-alpha', alpha);
+            alphaValue.textContent = Math.round(percent) + '%';
+        }
+
+        slider.addEventListener('input', (e) => {
+            updateAlpha(e.target.value);
+        });
+
+        // 初始设置（默认 100%）
+        updateAlpha(slider.value);
+
+        // ============================================================
+        // 1. 鼠标跟随高光
+        // ============================================================
+        const glowFollow = document.getElementById('glowFollow');
+
+        overlay.addEventListener('mousemove', (e) => {
+            const rect = overlay.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            overlay.style.setProperty('--mx', x + '%');
+            overlay.style.setProperty('--my', y + '%');
+        });
+
+        // ============================================================
+        // 2. 涟漪引擎 (HarmonyOS NEXT 同款)
+        // ============================================================
+        const canvas = document.getElementById('rippleCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let ripples = [];
+        let animationId = null;
+
+        class Ripple {
+            constructor(x, y, maxRadiusOverride = null) {
+                this.x = x;
+                this.y = y;
+                this.radius = 0;
+                this.maxRadius = maxRadiusOverride || (Math.max(width, height) * 0.4);
+                this.opacity = 0.9;
+                this.speed = 2.5 + Math.random() * 1.5;
+                this.life = 1.0;
+                this.decay = 0.006 + Math.random() * 0.004;
+                this.hueShift = (Math.random() - 0.5) * 30;
+                this.baseHue = 40;
+            }
+
+            update() {
+                this.radius += this.speed;
+                this.life -= this.decay;
+                this.opacity = this.life * 0.9;
+                return this.life > 0 && this.radius < this.maxRadius;
+            }
+
+            draw(ctx) {
+                const hue = this.baseHue + this.hueShift;
+                const gradient = ctx.createRadialGradient(
+                    this.x, this.y, 0,
+                    this.x, this.y, this.radius
+                );
+                gradient.addColorStop(0, `hsla(${hue}, 80%, 70%, ${this.opacity * 0.6})`);
+                gradient.addColorStop(0.3, `hsla(${hue + 10}, 70%, 60%, ${this.opacity * 0.3})`);
+                gradient.addColorStop(0.7, `hsla(${hue + 20}, 60%, 50%, ${this.opacity * 0.1})`);
+                gradient.addColorStop(1, `hsla(${hue + 30}, 50%, 40%, 0)`);
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                const coreGradient = ctx.createRadialGradient(
+                    this.x, this.y, 0,
+                    this.x, this.y, this.radius * 0.2
+                );
+                coreGradient.addColorStop(0, `rgba(255, 255, 255, ${this.opacity * 0.5})`);
+                coreGradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 0.2, 0, Math.PI * 2);
+                ctx.fillStyle = coreGradient;
+                ctx.fill();
+            }
+        }
+
+        function resizeCanvas() {
+            const rect = overlay.getBoundingClientRect();
+            width = rect.width;
+            height = rect.height;
+            canvas.width = width;
+            canvas.height = height;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+        }
+
+        function createRipple(clientX, clientY, maxRadiusOverride = null) {
+            const rect = overlay.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+            if (x < 0 || x > width || y < 0 || y > height) return;
+
+            const count = 2 + Math.floor(Math.random() * 2);
+            for (let i = 0; i < count; i++) {
+                const offset = 5 + Math.random() * 15;
+                const angle = Math.random() * Math.PI * 2;
+                const ripple = new Ripple(
+                    x + Math.cos(angle) * offset,
+                    y + Math.sin(angle) * offset,
+                    maxRadiusOverride
+                );
+                ripple.speed = 2 + Math.random() * 2;
+                ripple.decay = 0.005 + Math.random() * 0.005;
+                ripple.baseHue = 35 + Math.random() * 20;
+                ripples.push(ripple);
+            }
+            if (ripples.length > 60) {
+                ripples.splice(0, ripples.length - 60);
+            }
+            if (!animationId) {
+                animateRipples();
+            }
+        }
+
+        function createRippleAtElement(el, maxRadiusOverride = null) {
+            const rect = el.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const finalMax = maxRadiusOverride || (Math.max(width, height) * 0.6);
+            createRipple(centerX, centerY, finalMax);
+        }
+
+        function animateRipples() {
+            ctx.clearRect(0, 0, width, height);
+            ripples = ripples.filter(ripple => {
+                const alive = ripple.update();
+                if (alive) ripple.draw(ctx);
+                return alive;
+            });
+            if (ripples.length > 0) {
+                animationId = requestAnimationFrame(animateRipples);
+            } else {
+                animationId = null;
+                ctx.clearRect(0, 0, width, height);
+            }
+        }
+
+        // ---------- 背景点击涟漪 ----------
+        overlay.addEventListener('mousedown', (e) => {
+            if (e.target.closest('nav a') || e.target.closest('.toolbar')) return;
+            createRipple(e.clientX, e.clientY);
+        });
+
+        let isDragging = false;
+        overlay.addEventListener('mousedown', (e) => {
+            if (e.target.closest('nav a') || e.target.closest('.toolbar')) return;
+            isDragging = true;
+        });
+        overlay.addEventListener('mouseup', () => { isDragging = false; });
+        overlay.addEventListener('mouseleave', () => { isDragging = false; });
+
+        overlay.addEventListener('mousemove', (e) => {
+            if (isDragging && !e.target.closest('nav a') && !e.target.closest('.toolbar')) {
+                createRipple(e.clientX, e.clientY);
+            }
+        });
+
+        // 移动端触摸（优化）
+        overlay.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            if (!touch) return;
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (target && (target.closest('nav a') || target.closest('.toolbar'))) return;
+            // 不阻止默认，以免影响滚动
+            createRipple(touch.clientX, touch.clientY);
+        }, { passive: true });
+
+        overlay.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            if (!touch) return;
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (target && (target.closest('nav a') || target.closest('.toolbar'))) return;
+            createRipple(touch.clientX, touch.clientY);
+        }, { passive: true });
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // ============================================================
+        // 3. 导航按钮交互 + 页面切换
+        // ============================================================
+        let currentPage = 'home';
+        let allData = null;
+        let refreshTimer = null;
+        const contentDiv = document.getElementById('content');
+        const navLinks = document.querySelectorAll('.nav-links a');
+
+        function switchPage(pageId) {
+            currentPage = pageId;
+            window.location.hash = pageId;
+            navLinks.forEach(a => a.classList.toggle('active', a.dataset.page === pageId));
+            renderContent(pageId);
+        }
+
+        function restorePageFromHash() {
+            const hash = window.location.hash.replace('#', '');
+            if (['home', 'posts', 'moments', 'about'].includes(hash)) {
+                currentPage = hash;
+                navLinks.forEach(a => a.classList.toggle('active', a.dataset.page === currentPage));
+                renderContent(currentPage);
+            }
+        }
+
+        function renderContent(pageId) {
+            if (!allData) return;
+            const data = allData;
+            let html = '';
+            switch (pageId) {
+                case 'home':
+                    html = data.home;
+                    break;
+                case 'about':
+                    html = data.about;
+                    break;
+                case 'posts':
+                    html = data.posts.map(p =>
+                        `<div class="item"><h3>${p.id} <small>文章</small></h3>${p.html}</div>`
+                    ).join('') || '<p>📭 还没有文章。</p>';
+                    break;
+                case 'moments':
+                    html = data.moments.map(m =>
+                        `<div class="item"><h3>${m.id} <small>动态</small></h3>${m.html}</div>`
+                    ).join('') || '<p>📭 还没有动态。</p>';
+                    break;
+                default:
+                    html = '<p>页面不存在</p>';
+            }
+            contentDiv.innerHTML = html;
+        }
+
+        navLinks.forEach(a => {
+            const handler = (e) => {
+                e.stopPropagation();
+                const page = a.dataset.page;
+                createRippleAtElement(a, Math.max(width, height) * 0.6);
+                switchPage(page);
+            };
+            a._clickHandler = handler;
+            a.addEventListener('click', handler);
+        });
+
+        window.addEventListener('hashchange', restorePageFromHash);
+
+        // ============================================================
+        // 4. 热更新数据 + 设置 favicon
+        // ============================================================
+        async function fetchData() {
+            try {
+                const res = await fetch('/api/data');
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+                const data = await res.json();
+                allData = data;
+
+                document.title = data.config.siteTitle || '我的博客';
+                if (data.config.background) {
+                    document.body.style.backgroundImage = `url(${data.config.background})`;
+                }
+
+                const favicon = data.config.favicon;
+                if (favicon) {
+                    let link = document.querySelector('link[rel="icon"]');
+                    if (!link) {
+                        link = document.createElement('link');
+                        link.rel = 'icon';
+                        document.head.appendChild(link);
+                    }
+                    link.href = favicon;
+                }
+
+                restorePageFromHash();
+
+                const interval = data.config.refreshInterval || 3000;
+                if (refreshTimer) clearInterval(refreshTimer);
+                refreshTimer = setInterval(fetchData, interval);
+
+                contentDiv.querySelector('.error-msg')?.remove();
+            } catch (err) {
+                console.error('加载数据失败', err);
+                contentDiv.innerHTML = `
+                        <div class="error-msg">
+                            <p>⚠️ 内容加载失败，请检查网络或稍后重试。</p>
+                            <p style="font-size:0.9rem;color:#888;">${err.message}</p>
+                            <button onclick="fetchData()">重试</button>
+                        </div>
+                    `;
+            }
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
